@@ -24,7 +24,7 @@ void ResetArgs()
 void CallHash(unsigned int hash, NativeArg_s* pArg)
 {
 	unsigned int l_uiHashTablePointer = 0x1782CE8;
-	unsigned int l_uiModulator = 0x1782CEC; == 0x1782CE8 + 0x04
+	unsigned int l_uiModulator = 0x1782CEC; //== 0x1782CE8 + 0x04
 
 	int index = hash % l_uiModulator;
 	unsigned int temp_native_hash = hash;
