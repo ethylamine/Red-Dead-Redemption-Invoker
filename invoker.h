@@ -21,30 +21,32 @@ void ResetArgs()
 	NativeArg->ArgValues = (int*)0x10050000;
 	NativeArg->ReturnValue = NativeArg->ArgValues;
 }
+
 void CallHash(unsigned int hash, NativeArg_s* pArg)
 {
-	unsigned int l_uiHashTablePointer = 0x1782CE8;
-	unsigned int l_uiModulator = 0x1782CEC; //== 0x1782CE8 + 0x04
+    unsigned int l_uiHashTablePointer = 0x1782CE8;
+    unsigned int l_uiModulator = *(unsigned int *)0x1782CEC; //== 0x1782CE8 + 0x04
 
-	int index = hash % l_uiModulator;
-	unsigned int temp_native_hash = hash;
+    int index = hash % l_uiModulator;
+    unsigned int l_uiHashTableAddress = *(unsigned int *)l_uiHashTablePointer;
+    unsigned int temp_native_hash = hash;
 
-	while (modulator != 0)
-	{
-		Native_s table = *(Native_s *)(l_uiHashTablePointer + 8 * index);
-		if (table.nativeHash == hash)
-		{
-			if (table.nativeFunction != 0 && table.nativeFunction != 0xCDCDCDCD)
-			{
-				((void(*)(NativeArg_s*))table.nativeFunction)(pArg);
-				return;
-			}
-		}
+    while (l_uiModulator != 0)
+    {
+        Native_s table = *(Native_s *)(l_uiHashTableAddress + 8 * index); // cast to Native_s struc captures the raw 8 bytes of jenkins hash and function offset from native table
+        if (table.nativeHash == hash)
+        {
+            if (table.nativeFunction != 0 && table.nativeFunction != 0xCDCDCDCD)
+            {
+                ((void(*)(NativeArg_s*))table.nativeFunction)(pArg);
+                return;
+            }
+        }
 
-		temp_native_hash = (temp_native_hash >> 1) + 1;
-		index = (temp_native_hash + index) % modulator;
-	}
-	return;
+        temp_native_hash = (temp_native_hash >> 1) + 1;
+        index = (temp_native_hash + index) % l_uiModulator;
+    }
+    return;
 }
 
 template<typename T>
